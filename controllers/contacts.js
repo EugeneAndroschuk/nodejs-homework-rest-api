@@ -22,7 +22,8 @@ const updateFavoriteSchema = Joi.object({
 
 const listContacts = async (req, res, next) => {
   try {
-    const listContacts = await Contact.find();
+    const { _id} = req.user;
+    const listContacts = await Contact.find({owner: _id});
     res.status(200).json(listContacts);
   } catch (error) {
     next(error);
@@ -43,11 +44,12 @@ const getContactById = async (req, res, next) => {
 
 const addContact = async (req, res, next) => {
   try {
+    const { _id } = req.user;
     const { name, email, phone } = req.body;
     const { error } = addSchema.validate({ name, email, phone });
     if (error) throw HttpError(400, "missing required name field");
 
-    const addedContact = await Contact.create(req.body);
+    const addedContact = await Contact.create({...req.body, owner: _id});
     res.status(201).json(addedContact);
   } catch (error) {
     next(error);
