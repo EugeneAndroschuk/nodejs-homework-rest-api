@@ -1,29 +1,23 @@
-const Contact = require('../models/contact');
-const updateStatusContact = require('../utils/updateStatusContact ');
-const Joi = require("joi");
-const HttpError = require("../utils/HttpError");
-
-const addSchema = Joi.object({
-  name: Joi.string()
-    .min(5)
-    .max(20)
-    .pattern(/^[A-Z]+[a-z]+ [A-Z]+[a-z]+$/)
-    .required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string()
-    .pattern(/^([(]\d{3}[)])+ \d{3}-\d{4}$/)
-    .required(),
-  favorite: Joi.boolean(),
-});
-
-const updateFavoriteSchema = Joi.object({
-  favorite: Joi.boolean().required(),
-});
+const { Contact } = require('../models');
+const {
+  contactsJoiSchemas,
+  HttpError,
+  updateStatusContact,
+} = require("../utils");
 
 const listContacts = async (req, res, next) => {
   try {
-    const { _id} = req.user;
-    const listContacts = await Contact.find({owner: _id});
+    const { _id } = req.user;
+    const { page = 1, limit = 20, favorite } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const filterOptions = favorite ? {favorite: favorite} : {};
+
+    const listContacts = await Contact.find({ owner: _id, ...filterOptions }, "", {
+      skip,
+      limit,
+    });
     res.status(200).json(listContacts);
   } catch (error) {
     next(error);
@@ -46,7 +40,11 @@ const addContact = async (req, res, next) => {
   try {
     const { _id } = req.user;
     const { name, email, phone } = req.body;
-    const { error } = addSchema.validate({ name, email, phone });
+    const { error } = contactsJoiSchemas.addSchema.validate({
+      name,
+      email,
+      phone,
+    });
     if (error) throw HttpError(400, "missing required name field");
 
     const addedContact = await Contact.create({...req.body, owner: _id});
@@ -71,7 +69,11 @@ const removeContact = async (req, res, next) => {
 const updateContact = async (req, res, next) => {
   try {
     const { name, email, phone } = req.body;
-    const { error } = addSchema.validate({ name, email, phone });
+    const { error } = contactsJoiSchemas.addSchema.validate({
+      name,
+      email,
+      phone,
+    });
     if (error) throw HttpError(400, "missing fields");
 
     const { contactId } = req.params;
@@ -86,7 +88,7 @@ const updateContact = async (req, res, next) => {
 
 const updateFavorite = async (req, res, next) => {
   try {
-    const { error } = updateFavoriteSchema.validate(req.body);
+    const { error } = contactsJoiSchemas.updateFavoriteSchema.validate(req.body);
     if (error) throw HttpError(400, "missing field favorite");
 
     const { contactId } = req.params;
