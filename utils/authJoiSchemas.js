@@ -18,8 +18,13 @@ const updateSubscriptionSchema = Joi.object({
     .required(),
 });
 
+const resendEmailSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   updateSubscriptionSchema,
+  resendEmailSchema,
 };
