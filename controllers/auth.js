@@ -12,6 +12,10 @@ require("dotenv").config();
 const { JWT_SECRET, BASE_URL } = process.env;
 const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 const uploadDir = path.join(__dirname, "../", "tmp");
+const prodDir = path.join(__dirname);
+let dir;
+
+if (process.env.NODE_ENV === "production") dir = prodDir; else dir = BASE_URL;
 
 const registerUser = async (req, res, next) => {
   try {
@@ -38,7 +42,7 @@ const registerUser = async (req, res, next) => {
     const verifyEmail = {
       to: email,
       subject: "Verification email",
-      html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click to verify your email</a>`,
+      html: `<a target="_blank" href="${dir}/api/users/verify/${verificationToken}">Click to verify your email</a>`,
     };
 
     await sendEmailSendgrid(verifyEmail);
