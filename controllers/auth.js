@@ -71,7 +71,7 @@ const verifyEmail = async (req, res, next) => {
       verificationToken: null,
     });
 
-    res.status(200).json({ message: "Verification successful" });
+    res.status(200).json({ message: "Verification successful, please SIGN IN" });
   } catch (error) {
     next(error);
   }
