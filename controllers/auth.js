@@ -12,7 +12,7 @@ require("dotenv").config();
 const { JWT_SECRET, BASE_URL } = process.env;
 const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 const uploadDir = path.join(__dirname, "../", "tmp");
-const prodDir = path.join(__dirname);
+const prodDir = "https://db-phonebook-olo8.onrender.com";
 let dir;
 
 if (process.env.NODE_ENV === "production") dir = prodDir; else dir = BASE_URL;
